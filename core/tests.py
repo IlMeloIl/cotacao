@@ -12,11 +12,7 @@ class CoreAppTests(TestCase):
         self.service = VatcomplyService()
 
     def test_create_cotacao_model(self):
-        cotacao = Cotacao.objects.create(
-            moeda='BRL',
-            valor='5.6439',
-            data=date(2025, 5, 20)
-        )
+        cotacao = Cotacao.objects.create(moeda='BRL', valor='5.6439',data=date(2025, 5, 20))
         self.assertIsNotNone(cotacao)
         self.assertEqual(cotacao.moeda, 'BRL')
         self.assertEqual(cotacao.valor, '5.6439')
@@ -123,3 +119,48 @@ class DadosGraficoAPITests(TestCase):
         erro = response.json()
         self.assertIn('error', erro)
         self.assertEqual(erro['error'], 'Parametros data_inicio, data_fim e moedas sao obrigatorios.')
+
+class CotacaoAPITests(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.cotacao_brl = Cotacao.objects.create(moeda='BRL', valor = '5.20', data=date(2025, 6, 18))
+        self.cotacao_eur = Cotacao.objects.create(moeda='EUR', valor = '0.92', data=date(2025, 6, 18))
+        self.list_url = reverse('core:cotacao-list')
+
+    def test_list_cotacoes_api(self):
+        response = self.client.get(self.list_url)
+        self.assertEqual(response.status_code, 200)
+
+        json_response = response.json()
+
+        self.assertIsNotNone(json_response)
+        self.assertEqual(len(json_response), 2)
+        self.assertEqual(json_response[0]['moeda'], 'BRL')
+
+    def test_filter_cotacoes_api_by_moeda(self):
+        url = f'{self.list_url}?moeda=EUR'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+        json_response = response.json()
+        
+        self.assertIsNotNone(json_response)
+        self.assertEqual(len(json_response), 1)
+        self.assertEqual(json_response[0]['moeda'], 'EUR')
+
+    def test_filter_cotacoes_api_by_date_range(self):
+        Cotacao.objects.create(moeda='JPY', valor='150.0', data=date(2025, 6, 20))
+
+        data_inicio = '2025-06-18'
+        data_fim = '2025-06-18'
+
+        url = f"{self.list_url}?data_inicio={data_inicio}&data_fim={data_fim}"
+            
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+        json_response = response.json()
+
+        self.assertIsNotNone(json_response)
+        self.assertEqual(len(json_response), 2)
+        self.assertEqual(json_response[0]['data'], data_inicio)

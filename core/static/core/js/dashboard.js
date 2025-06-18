@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         const moedasStr = moedasSelecionadas.join(',');
-        const apiUrl = `/api/cotacoes/?data_inicio=${dataInicio}&data_fim=${dataFim}&moedas=${moedasStr}`;
+        const apiUrl = `/api/grafico/?data_inicio=${dataInicio}&data_fim=${dataFim}&moedas=${moedasStr}`;
 
         statusMsgDiv.textContent = 'Buscando dados...';
         statusMsgDiv.className = 'status-loading';

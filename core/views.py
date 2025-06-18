@@ -1,8 +1,12 @@
 from django.views.generic import TemplateView
 from django.http import JsonResponse
 from datetime import datetime, timedelta
+from rest_framework import viewsets
+from django_filters.rest_framework import DjangoFilterBackend
 
 from .models import Cotacao
+from .serializers import CotacaoSerializer
+from .filters import CotacaoFilter
 
 class PaginaInicialView(TemplateView):
     template_name = 'core/index.html'
@@ -49,3 +53,10 @@ def dados_grafico(request):
 
     dados_formatados = list(cotacoes)
     return JsonResponse(dados_formatados, safe=False)
+
+class CotacaoViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Cotacao.objects.all().order_by('-data', 'moeda')
+    serializer_class = CotacaoSerializer
+
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = CotacaoFilter
