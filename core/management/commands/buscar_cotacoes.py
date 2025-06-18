@@ -23,7 +23,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.service = VatcomplyService()
-        self.moedas_desejadas = ['BRL', 'EUR', 'JPY']
+        self.moedas_desejadas = Cotacao.Moedas.values
         
         data_str = options.get('data')
         inicio_str = options.get('inicio')

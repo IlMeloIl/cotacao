@@ -28,6 +28,7 @@ def dados_grafico(request):
             status=400
         )
 
+    # limita consulta para no maximo 5 dias uteis
     dias_uteis = 0
     data_atual = data_inicio
     while data_atual <= data_fim:

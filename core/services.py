@@ -1,5 +1,7 @@
 import requests
-from datetime import date
+import logging
+
+logger = logging.getLogger(__name__)
 
 class VatcomplyService:
     BASE_URL = "https://api.vatcomply.com/rates"
@@ -19,5 +21,5 @@ class VatcomplyService:
             data = response.json()
             return data.get('rates', {})
         except requests.exceptions.RequestException as e :
-            print(f"Erro ao acesar API da Vatcomply: {e}")
+            logger.error(f"Erro ao acesar API da Vatcomply: {e}")
             return None
