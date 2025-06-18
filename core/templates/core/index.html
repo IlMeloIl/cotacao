@@ -1,0 +1,56 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Cotações</title>
+    <style>
+        body { font-family: sans-serif; margin: 0; padding: 2em; background-color: #f4f4f9; color: #333; }
+        h1 { text-align: center; margin-bottom: 1em; }
+        .controles { margin-bottom: 2em; padding: 1.5em; border: 1px solid #ccc; border-radius: 8px; background-color: #fff; display: flex; flex-wrap: wrap; justify-content: center; gap: 2em; align-items: flex-end; }
+        .controles > div { min-width: 150px; }
+        label { display: block; margin-bottom: 0.5em; font-weight: bold; }
+        input[type="date"] { padding: 0.7em; border-radius: 4px; border: 1px solid #ccc; width: 100%; box-sizing: border-box; }
+        .moedas label { display: inline-block; margin-right: 1em; font-weight: normal; }
+        .dashboard { display: grid; grid-template-columns: 2fr 1fr; gap: 2em; }
+        .chart-main { grid-column: 1 / -1; }
+        .chart-container { width: 100%; min-height: 450px; background-color: #fff; border: 1px solid #ccc; border-radius: 8px; padding: 1em; box-sizing: border-box; }
+        #status-msg { grid-column: 1 / -1; text-align: center; margin-top: 1em; padding: 1em; border-radius: 4px; display: none; }
+        .status-error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .status-loading { background-color: #e2e3e5; color: #383d41; border: 1px solid #d6d8db; }
+    </style>
+</head>
+<body>
+
+    <h1>Dashboard de Cotações de Moedas (Base: USD)</h1>
+
+    <div class="controles">
+        <div>
+            <label for="data_inicio">Data de Início:</label>
+            <input type="date" id="data_inicio" name="data_inicio">
+        </div>
+        <div>
+            <label for="data_fim">Data de Fim:</label>
+            <input type="date" id="data_fim" name="data_fim">
+        </div>
+        <div class="moedas">
+            <label>Moedas:</label>
+            <label><input type="checkbox" name="moeda" value="BRL" checked> Real (BRL)</label>
+            <label><input type="checkbox" name="moeda" value="EUR" checked> Euro (EUR)</label>
+            <label><input type="checkbox" name="moeda" value="JPY"> Iene (JPY)</label>
+        </div>
+    </div>
+
+    <div class="dashboard">
+        <div id="status-msg"></div>
+        <div id="chart-absolute" class="chart-container chart-main"></div>
+        <div id="chart-percentage" class="chart-container"></div>
+        <div id="chart-performance" class="chart-container"></div>
+    </div>
+
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="{% static 'core/js/dashboard.js' %}"></script>
+
+</body>
+</html>
