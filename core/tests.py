@@ -1,4 +1,5 @@
-from django.test import TestCase
+from django.test import TestCase, Client
+from django.urls import reverse
 from unittest.mock import patch, Mock
 from datetime import date
 import requests
@@ -57,3 +58,68 @@ class CoreAppTests(TestCase):
         rates = self.service.get_rates(target_date)
 
         self.assertIsNone(rates)
+
+class DadosGraficoAPITests(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.url = reverse('core:dados_grafico')
+
+        Cotacao.objects.create(moeda='BRL', valor='5.10', data=date(2025, 6, 9)) # Seg
+        Cotacao.objects.create(moeda='EUR', valor='0.90', data=date(2025, 6, 9)) # Seg
+        Cotacao.objects.create(moeda='BRL', valor='5.12', data=date(2025, 6, 10)) # Ter
+        Cotacao.objects.create(moeda='BRL', valor='5.15', data=date(2025, 6, 11)) # Qua
+        Cotacao.objects.create(moeda='BRL', valor='5.13', data=date(2025, 6, 12)) # Qui
+        Cotacao.objects.create(moeda='BRL', valor='5.18', data=date(2025, 6, 13)) # Sex
+
+    def test_requisicao_com_periodo_valido(self):
+        params = {
+            'data_inicio': '2025-06-09',
+            'data_fim': '2025-06-11',
+            'moedas': 'BRL',
+        }
+
+        response = self.client.get(self.url, params)
+        self.assertEqual(response.status_code, 200)
+
+        dados = response.json()
+        self.assertIsNotNone(dados)
+        self.assertEqual(len(dados), 3)
+        self.assertEqual(dados[0]['moeda'], 'BRL')
+        self.assertEqual(dados[0]['valor'], '5.1000')
+
+    def test_requisicao_com_periodo_invalido(self):
+        params = {
+            'data_inicio': '2025-06-09',
+            'data_fim': '2025-06-16',
+            'moedas': 'BRL',
+        }
+        response = self.client.get(self.url, params)
+        self.assertEqual(response.status_code, 400)
+
+        erro = response.json()
+        self.assertIn('error', erro)
+        self.assertEqual(erro['error'], 'O periodo selecionado tem 6 dias uteis, o maximo permitido: 5.')
+
+    def test_requisicao_para_periodo_sem_dados(self):
+        params = {
+            'data_inicio': '2024-01-01',
+            'data_fim': '2024-01-05',
+            'moedas': 'BRL'
+        }
+        response = self.client.get(self.url, params)
+        self.assertEqual(response.status_code, 200)
+
+        dados = response.json()
+        self.assertEqual(len(dados), 0)
+        self.assertEqual(dados, [])
+
+    def test_requisicao_com_parametros_faltando(self):
+        params = {
+            'data_inicio': '2025-06-16',
+        }
+        response = self.client.get(self.url, params)
+        self.assertEqual(response.status_code, 400)
+
+        erro = response.json()
+        self.assertIn('error', erro)
+        self.assertEqual(erro['error'], 'Parametros data_inicio, data_fim e moedas sao obrigatorios.')
