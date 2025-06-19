@@ -1,5 +1,6 @@
 from django.views.generic import TemplateView
 from django.http import JsonResponse
+from django.db.models import Min, Max
 from datetime import datetime, timedelta
 from rest_framework import viewsets
 from django_filters.rest_framework import DjangoFilterBackend
@@ -10,6 +11,24 @@ from .filters import CotacaoFilter
 
 class PaginaInicialView(TemplateView):
     template_name = 'core/index.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        datas_disponiveis = Cotacao.objects.aggregate(
+            min_data=Min('data'),
+            max_data=Max('data')
+        )
+
+        min_data = datas_disponiveis.get('min_data')
+        max_data = datas_disponiveis.get('max_data')
+
+        if min_data:
+            context['min_data_disponivel'] = min_data.strftime('%Y-%m-%d')
+        if max_data:
+            context['max_data_disponivel'] = max_data.strftime('%Y-%m-%d')
+
+        return context
 
 def dados_grafico(request):
     data_inicio_str = request.GET.get('data_inicio')

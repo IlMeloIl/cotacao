@@ -28,11 +28,15 @@
     <div class="controles">
         <div>
             <label for="data_inicio">Data de Início:</label>
-            <input type="date" id="data_inicio" name="data_inicio">
+            <input type="date" id="data_inicio" name="data_inicio"
+            {% if min_data_disponivel %}min="{{ min_data_disponivel }}"{% endif %}
+            {% if max_data_disponivel %}max="{{ max_data_disponivel }}"{% endif %}>
         </div>
         <div>
             <label for="data_fim">Data de Fim:</label>
-            <input type="date" id="data_fim" name="data_fim">
+            <input type="date" id="data_fim" name="data_fim"
+            {% if min_data_disponivel %}min="{{ min_data_disponivel }}"{% endif %}
+            {% if max_data_disponivel %}max="{{ max_data_disponivel }}"{% endif %}>
         </div>
         <div class="moedas">
             <label>Moedas:</label>
@@ -51,6 +55,7 @@
 
     <script src="https://code.highcharts.com/highcharts.js"></script>
     <script src="{% static 'core/js/dashboard.js' %}"></script>
+    <script>const MAX_DATA_DISPONIVEL = '{{ max_data_disponivel|default_if_none:"" }}'</script>
 
 </body>
 </html>

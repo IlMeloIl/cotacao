@@ -133,7 +133,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function setDefaultDates() {
-        const hoje = new Date();
+        const hoje = MAX_DATA_DISPONIVEL ? new Date(MAX_DATA_DISPONIVEL + 'T00:00:00') : new Date();
         const cincoDiasAtras = new Date();
         cincoDiasAtras.setDate(hoje.getDate() - 5);
         
