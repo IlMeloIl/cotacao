@@ -6,13 +6,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function renderizarGraficoAbsoluto(dados) {
         const series = {};
-        const limiarMagnitude = 50; // limite para decidir qual eixo Y usar
+        const moedasSelecionadas = new Set(dados.map(d => d.moeda))
 
         dados.forEach(cotacao => {
             const moeda = cotacao.moeda;
             const valor = parseFloat(cotacao.valor);
+            
             if (!series[moeda]) {
-                series[moeda] = { name: moeda, data: [], yAxis: valor < limiarMagnitude ? 0 : 1 };
+                let yAxisIndex = 0;
+                if (moedasSelecionadas.has('JPY') && (moedasSelecionadas.has('BRL') || moedasSelecionadas.has('EUR'))){
+                    if (moeda === 'JPY'){
+                        yAxisIndex = 1;
+                    }
+                } else if (moedasSelecionadas.size === 2 && moedasSelecionadas.has('BRL') && moedasSelecionadas.has('EUR')){
+                    if (moeda === 'EUR'){
+                        yAxisIndex = 1;
+                    }
+                }
+                series[moeda] = { name: moeda, data: [], yAxis: yAxisIndex };
             }
             series[moeda].data.push([new Date(cotacao.data).getTime(), valor]);
         });
@@ -21,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function () {
             title: { text: 'Cotações em Valores Absolutos (USD/Moeda)' },
             chart: { type: 'line', zoomType: 'x' },
             xAxis: { type: 'datetime' },
-            yAxis: [{ title: { text: 'Cotação (BRL, EUR)' } }, { title: { text: 'Cotação (JPY)' }, opposite: true }],
+            yAxis: [{ title: { text: 'Eixo Principal' } }, { title: { text: 'Eixo Secundário' }, opposite: true }],
             tooltip: { shared: true },
             plotOptions: { series: { marker: { enabled: true, radius: 3 } } },
             series: Object.values(series)
